@@ -31,7 +31,7 @@ const WizardPage = async () => {
     <div className="container flex max-w-2xl flex-col items-center justify-between gap-4">
       <h1 className="text-2xl text-center">Welcome, {user.firstName}!👋</h1>
       <h2 className="text-sm text-center">
-        Let's get started by setting your currency
+        Let get started by setting your currency
       </h2>
       <h3 className="text-xs text-center text-orange-500 flex gap-x-2">
         <Info className="w-4 h-4" />
@@ -48,7 +48,7 @@ const WizardPage = async () => {
         </CardContent>
       </Card>
       <Button asChild className="w-full">
-        <Link href={"/"}>I'm done! take me to dashboard</Link>
+        <Link href={"/"}>I am done! take me to dashboard</Link>
       </Button>
 
       <div className="mt-10">

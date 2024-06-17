@@ -44,7 +44,7 @@ const CategoryPicker = ({ type, onChange }: Props) => {
     (category: Category) => category.name === value
   );
 
-  const successCallBack = useCallback(
+  const successCallback = useCallback(
     (category: Category) => {
       setValue(category.name);
       setOpen((prev) => !prev);
@@ -72,7 +72,7 @@ const CategoryPicker = ({ type, onChange }: Props) => {
       <PopoverContent className="w-[200px] p-0">
         <Command onSubmit={(e) => e.preventDefault()}>
           <CommandInput placeholder="Search Category..." />
-          <CreateCategoryDialog type={type} successCallBack={successCallBack} />
+          <CreateCategoryDialog type={type} successCallback={successCallback} />
           <CommandEmpty>
             <p>Category not found</p>
             <p className="text-xs">Tip: Create a new category</p>

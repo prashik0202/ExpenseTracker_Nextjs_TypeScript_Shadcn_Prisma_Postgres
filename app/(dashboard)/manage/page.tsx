@@ -84,7 +84,7 @@ function CategoryList({ type }: { type: TransactionType }) {
 
             <CreateCategoryDialog
               type={type}
-              successCallBack={() => categoriesQuery.refetch()}
+              successCallback={() => categoriesQuery.refetch()}
               trigger={
                 <Button className="gap-2 text-sm">
                   <PlusSquare className="h-4 w-4" />

@@ -1,4 +1,5 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -32,34 +33,34 @@ import {
 } from "@/schema/categories";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CircleOff, Loader2, PlusSquare } from "lucide-react";
-import React, { ReactNode, useCallback } from "react";
+import React, { ReactNode, useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import Picker from "@emoji-mart/react";
 import data from "@emoji-mart/data";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { CreateCategory } from "../_actions/categories";
+import { CreateCategory } from "@/app/(dashboard)/_actions/categories";
 import { Category } from "@prisma/client";
 import { toast } from "sonner";
+import { useTheme } from "next-themes";
 
 interface Props {
   type: TransactionType;
-  successCallBack: (category: Category) => void;
+  successCallback: (category: Category) => void;
   trigger?: ReactNode;
 }
 
-const CreateCategoryDialog = ({ type, successCallBack, trigger }: Props) => {
-  const [open, setOpen] = React.useState(false);
-
-  const form = useForm({
+function CreateCategoryDialog({ type, successCallback, trigger }: Props) {
+  const [open, setOpen] = useState(false);
+  const form = useForm<CreateCategorySchemaType>({
     resolver: zodResolver(CreateCategorySchema),
     defaultValues: {
       type,
     },
   });
 
-  // Create category
-
   const queryClient = useQueryClient();
+  const theme = useTheme();
+
   const { mutate, isPending } = useMutation({
     mutationFn: CreateCategory,
     onSuccess: async (data: Category) => {
@@ -68,11 +69,12 @@ const CreateCategoryDialog = ({ type, successCallBack, trigger }: Props) => {
         icon: "",
         type,
       });
+
       toast.success(`Category ${data.name} created successfully 🎉`, {
         id: "create-category",
       });
 
-      successCallBack(data);
+      successCallback(data);
 
       await queryClient.invalidateQueries({
         queryKey: ["categories"],
@@ -81,7 +83,7 @@ const CreateCategoryDialog = ({ type, successCallBack, trigger }: Props) => {
       setOpen((prev) => !prev);
     },
     onError: () => {
-      toast.error("Something went wrong 😥", {
+      toast.error("Something went wrong", {
         id: "create-category",
       });
     },
@@ -89,10 +91,9 @@ const CreateCategoryDialog = ({ type, successCallBack, trigger }: Props) => {
 
   const onSubmit = useCallback(
     (values: CreateCategorySchemaType) => {
-      toast.loading("Creating Category...", {
+      toast.loading("Creating category...", {
         id: "create-category",
       });
-
       mutate(values);
     },
     [mutate]
@@ -106,10 +107,10 @@ const CreateCategoryDialog = ({ type, successCallBack, trigger }: Props) => {
         ) : (
           <Button
             variant={"ghost"}
-            className="flex items-center justify-start gap-x-4 p-3"
+            className="flex border-separate items-center justify-start roudned-none border-b px-3 py-3 text-muted-foreground"
           >
-            <PlusSquare />
-            Create New
+            <PlusSquare className="mr-2 h-4 w-4" />
+            Create new
           </Button>
         )}
       </DialogTrigger>
@@ -120,7 +121,7 @@ const CreateCategoryDialog = ({ type, successCallBack, trigger }: Props) => {
             <span
               className={cn(
                 "m-1",
-                type === "income" ? "text-green-500" : "text-red-500"
+                type === "income" ? "text-emerald-500" : "text-red-500"
               )}
             >
               {type}
@@ -128,11 +129,11 @@ const CreateCategoryDialog = ({ type, successCallBack, trigger }: Props) => {
             category
           </DialogTitle>
           <DialogDescription>
-            Categories are used to group your transaction
+            Categories are used to group your transactions
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form className="space-y-8" onSubmit={form.handleSubmit(onSubmit)}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <FormField
               control={form.control}
               name="name"
@@ -140,10 +141,10 @@ const CreateCategoryDialog = ({ type, successCallBack, trigger }: Props) => {
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input defaultValue={""} {...field} />
+                    <Input placeholder="Category" {...field} />
                   </FormControl>
                   <FormDescription>
-                    Transaction category name(required)
+                    This is how your category will appear in the app
                   </FormDescription>
                 </FormItem>
               )}
@@ -163,16 +164,20 @@ const CreateCategoryDialog = ({ type, successCallBack, trigger }: Props) => {
                           className="h-[100px] w-full"
                         >
                           {form.watch("icon") ? (
-                            <div className="flex flex-col items-center gap-y-2 justify-center">
-                              <span className="text-5xl " role="img">
+                            <div className="flex flex-col items-center gap-2">
+                              <span className="text-5xl" role="img">
                                 {field.value}
                               </span>
-                              click to change
+                              <p className="text-xs text-muted-foreground">
+                                Click to change
+                              </p>
                             </div>
                           ) : (
-                            <div className="flex flex-col items-center gap-y-2 justify-center">
-                              <CircleOff className="h-12 w-12" />
-                              click to select
+                            <div className="flex flex-col items-center gap-2">
+                              <CircleOff className="h-[48px] w-[48px]" />
+                              <p className="text-xs text-muted-foreground">
+                                Click to select
+                              </p>
                             </div>
                           )}
                         </Button>
@@ -180,7 +185,8 @@ const CreateCategoryDialog = ({ type, successCallBack, trigger }: Props) => {
                       <PopoverContent className="w-full">
                         <Picker
                           data={data}
-                          onEmojiSelect={(emoji) => {
+                          theme={theme.resolvedTheme}
+                          onEmojiSelect={(emoji: { native: string }) => {
                             field.onChange(emoji.native);
                           }}
                         />
@@ -188,7 +194,7 @@ const CreateCategoryDialog = ({ type, successCallBack, trigger }: Props) => {
                     </Popover>
                   </FormControl>
                   <FormDescription>
-                    this is how your category will appear on app
+                    This is how your category will appear in the app
                   </FormDescription>
                 </FormItem>
               )}
@@ -199,8 +205,10 @@ const CreateCategoryDialog = ({ type, successCallBack, trigger }: Props) => {
           <DialogClose asChild>
             <Button
               type="button"
-              variant={"ghost"}
-              onClick={() => form.reset()}
+              variant={"secondary"}
+              onClick={() => {
+                form.reset();
+              }}
             >
               Cancel
             </Button>
@@ -213,6 +221,6 @@ const CreateCategoryDialog = ({ type, successCallBack, trigger }: Props) => {
       </DialogContent>
     </Dialog>
   );
-};
+}
 
 export default CreateCategoryDialog;
